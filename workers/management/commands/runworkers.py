@@ -57,6 +57,8 @@ class Command(BaseCommand):
 
                     if task.schedule:
                         Task.create_scheduled_task(task.handler, task.schedule)
+                    else:
+                        task.create_repeated()
 
                 # if PURGE is 1000, we will keep the latest 1000 completed tasks
                 keep = (

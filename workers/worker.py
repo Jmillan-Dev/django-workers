@@ -8,7 +8,7 @@ registry = {}  # Store reference to task functions
 scheduled = []  # Scheduled tasks to be started on `runworkers` cmd
 
 
-def task(schedule=None):
+def task(schedule=None, repeat=0):
     def task_handler(fn):
         handler = '{0}.{1}'.format(fn.__module__, fn.__name__)
         registry[handler] = fn
@@ -18,11 +18,17 @@ def task(schedule=None):
 
         def wrapper(*args, **kwargs):
             run_at = kwargs.pop('_schedule', timezone.now())
+            _repeat = kwargs.pop('_repeat', repeat)
+
+            task_hash = Task.get_hash(handler, args, kwargs)
+
+            # should be check if we have already the same Task generated?
             task = Task.objects.create(
                 handler=handler,
                 args=json.dumps(args),
                 kwargs=json.dumps(kwargs),
-                run_at=run_at
+                repeat=_repeat,
+                run_at=run_at,
             )
 
             # return the task id in case needed for polling
