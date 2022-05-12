@@ -2,10 +2,17 @@ from django.db import migrations, models
 
 
 def update_hash(apps, schema_editor):
+    from ..util import get_hash
+    import json
+
     Task = apps.get_model('workers', 'Task')
 
     for task in Task.objects.all():
-        task.token_hash = task.get_hash(task.task_name, task.args, task.kwargs)
+        task.task_hash = get_hash(
+            task.handler,
+            json.loads(task.args),
+            json.loads(task.kwargs),
+        )
         task.save()
 
 

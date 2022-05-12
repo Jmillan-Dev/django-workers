@@ -1,10 +1,10 @@
 from datetime import timedelta
-from hashlib import sha1
-import json
 import logging
 
 from django.db import models
 from django.utils import timezone
+
+from .util import get_hash
 
 
 log = logging.getLogger(__name__)
@@ -95,14 +95,7 @@ class Task(models.Model):
             run_at=scheduled_time,
         )
 
-    @staticmethod
-    def get_hash(task_name, args=None, kwargs=None):
-        args = args or []
-        kwargs = kwargs or {}
-
-        params = json.dumps((args, kwargs), sort_keys=True)
-        v = '%s%s' % (task_name, params)
-        return sha1(v.encode('utf-8')).hexdigest()
+    get_hash = staticmethod(get_hash)
 
     @staticmethod
     def create_scheduled_task(handler, schedule):

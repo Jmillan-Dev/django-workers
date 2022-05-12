@@ -1,4 +1,6 @@
+from hashlib import sha1
 import logging
+import json
 
 from importlib import import_module
 
@@ -30,3 +32,14 @@ def autodiscover():
 
         log.debug('discovered {0}.tasks'.format(app))
         import_module("%s.tasks" % app)
+
+
+def get_hash(task_name, args=None, kwargs=None):
+        args = args or []
+        kwargs = kwargs or {}
+
+        params = json.dumps((args, kwargs), sort_keys=True)
+        v = '%s%s' % (task_name, params)
+        return sha1(v.encode('utf-8')).hexdigest()
+
+
