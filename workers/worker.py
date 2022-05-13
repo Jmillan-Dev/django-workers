@@ -25,6 +25,7 @@ def task(schedule=None, repeat=0):
             # should be check if we have already the same Task generated?
             task = Task.objects.create(
                 handler=handler,
+                task_hash=task_hash,
                 args=json.dumps(args),
                 kwargs=json.dumps(kwargs),
                 repeat=_repeat,
@@ -33,6 +34,8 @@ def task(schedule=None, repeat=0):
 
             # return the task id in case needed for polling
             return task.pk
+
+        setattr(wrapper, '__handler_name__', handler)
         return wrapper
     return task_handler
 
