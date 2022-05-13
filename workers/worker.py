@@ -15,6 +15,7 @@ def task(schedule=None, repeat=0, run_at_as_kwargs=False):
 
         if schedule:
             scheduled.append({'handler': handler, 'schedule': schedule})
+        setattr(fn, '__run_at_as_kwargs__', run_at_as_kwargs)
 
         def wrapper(*args, **kwargs):
             run_at = kwargs.pop('_schedule', timezone.now())
@@ -36,7 +37,6 @@ def task(schedule=None, repeat=0, run_at_as_kwargs=False):
             return task.pk
 
         setattr(wrapper, '__handler_name__', handler)
-        setattr(wrapper, '__run_at_as_kwargs__', run_at_as_kwargs)
         return wrapper
     return task_handler
 
