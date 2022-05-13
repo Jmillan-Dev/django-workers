@@ -45,7 +45,10 @@ class Command(BaseCommand):
                     kwargs = json.loads(task.kwargs)
 
                     try:
-                        registry[task.handler](*args, **kwargs)
+                        func = registry[task.handler]
+                        if getattr(func, '__run_at_as_kwargs__', False):
+                            kwargs.update({'_run_at': task.run_at})
+                        func(*args, **kwargs)
                         task.status = Task.COMPLETED
                     except Exception as e:
                         task.status = Task.FAILED

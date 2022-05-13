@@ -8,7 +8,7 @@ registry = {}  # Store reference to task functions
 scheduled = []  # Scheduled tasks to be started on `runworkers` cmd
 
 
-def task(schedule=None, repeat=0):
+def task(schedule=None, repeat=0, run_at_as_kwargs=False):
     def task_handler(fn):
         handler = '{0}.{1}'.format(fn.__module__, fn.__name__)
         registry[handler] = fn
@@ -36,6 +36,7 @@ def task(schedule=None, repeat=0):
             return task.pk
 
         setattr(wrapper, '__handler_name__', handler)
+        setattr(wrapper, '__run_at_as_kwargs__', run_at_as_kwargs)
         return wrapper
     return task_handler
 
