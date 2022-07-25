@@ -99,9 +99,23 @@ class Task(models.Model):
 
     @staticmethod
     def create_scheduled_task(handler, schedule):
-        if Task.objects.filter(handler=handler, schedule=schedule, completed_at=None).exists():
-            log.warn('trying to schedule an already scheduled task: {0}'.format(handler))
+        if Task.objects.filter(handler=handler, schedule=schedule,
+                               completed_at=None).exists():
+            log.warn(
+                'trying to schedule an already scheduled task: {0}'.format(handler)
+            )
             return
+
+        previous_schedules = Task.objects.filter(
+            handler=handler, completed_at=None, schedule__isnull=False,
+        ).exclude(schedule=schedule)
+
+        deleted, _ = previous_schedules.delete()
+
+        if deleted:
+            log.info('deleted previous schedules for {0} ({1})'.format(
+                handler, deleted
+            ))
 
         scheduled_time = timezone.now() + timedelta(seconds=schedule)
         log.debug('scheduling task: {0} for {1}'.format(handler, scheduled_time))
